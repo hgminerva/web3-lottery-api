@@ -10,7 +10,7 @@ import { SetupDto } from './dto/setup.dto';
 @Injectable()
 export class LotteryService {
   private readonly contractAddress = process.env.CONTRACT_ADDRESS || '';
-  private readonly contractGasOptions = { storageDepositLimit: null, gasLimit: -1 };
+  private readonly contractGasLimits = { storageDepositLimit: null, gasLimit: 3000n * 1000000n };
 
   setup(api: ApiPromise, setupDto: SetupDto): string {
     if (!api.isConnected) {
@@ -19,7 +19,7 @@ export class LotteryService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['setup'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       setupDto.operator,
       setupDto.asset_id,
       setupDto.starting_block,
@@ -37,7 +37,7 @@ export class LotteryService {
     }
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['start'](this.contractGasOptions);
+    const contractTx = contract.tx['start'](this.contractGasLimits);
 
     return contractTx.toHex();
   }
@@ -48,7 +48,7 @@ export class LotteryService {
     }
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['stop'](this.contractGasOptions);
+    const contractTx = contract.tx['stop'](this.contractGasLimits);
 
     return contractTx.toHex();
   }
@@ -59,7 +59,7 @@ export class LotteryService {
     }
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['getLotterySetup'](this.contractGasOptions);
+    const contractTx = contract.tx['getLotterySetup'](this.contractGasLimits);
 
     return contractTx.toHex();
   }

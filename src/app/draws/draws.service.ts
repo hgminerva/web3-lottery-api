@@ -14,7 +14,7 @@ import { CloseDrawDto } from './dto/close-draw.dto';
 @Injectable()
 export class DrawsService {
   private readonly contractAddress = process.env.CONTRACT_ADDRESS || '';
-  private readonly contractGasOptions = { storageDepositLimit: null, gasLimit: -1 };
+  private readonly contractGasLimits = { storageDepositLimit: null, gasLimit: 3000n * 1000000n };
 
   addDraw(api: ApiPromise, addDrawDto: AddDrawDto): string {
     if (!api.isConnected) {
@@ -23,7 +23,7 @@ export class DrawsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['addDraw'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       addDrawDto.opening_blocks,
       addDrawDto.processing_blocks,
       addDrawDto.closing_blocks,
@@ -39,7 +39,7 @@ export class DrawsService {
     }
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['removeDraw'](this.contractGasOptions);
+    const contractTx = contract.tx['removeDraw'](this.contractGasLimits);
 
     return contractTx.toHex();
   }
@@ -51,7 +51,7 @@ export class DrawsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['openDraw'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       openDrawDto.draw_number,
     );
 
@@ -65,7 +65,7 @@ export class DrawsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['processDraw'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       processDrawDto.draw_number,
     );
 
@@ -79,7 +79,7 @@ export class DrawsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['overrideDraw'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       overrideDrawDto.draw_number,
       overrideDrawDto.winning_number,
     );
@@ -94,7 +94,7 @@ export class DrawsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['closeDraw'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       closeDrawDto.draw_number,
     );
 
@@ -107,7 +107,7 @@ export class DrawsService {
     }
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['getDraws'](this.contractGasOptions);
+    const contractTx = contract.tx['getDraws'](this.contractGasLimits);
 
     return contractTx.toHex();
   }

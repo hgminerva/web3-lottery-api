@@ -10,7 +10,7 @@ import { AddBetDto } from './dto/add-bet.dto';
 @Injectable()
 export class BetsService {
   private readonly contractAddress = process.env.CONTRACT_ADDRESS || '';
-  private readonly contractGasOptions = { storageDepositLimit: null, gasLimit: -1 };
+  private readonly contractGasLimits = { storageDepositLimit: null, gasLimit: 3000n * 1000000n };
 
   addBet(api: ApiPromise, addBetDto: AddBetDto): string {
     if (!api.isConnected) {
@@ -19,7 +19,7 @@ export class BetsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['addBet'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       addBetDto.draw_number,
       addBetDto.bet_number,
       addBetDto.bettor,
@@ -37,7 +37,7 @@ export class BetsService {
 
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['getBets'](
-      this.contractGasOptions,
+      this.contractGasLimits,
       draw_number,
     );
 
