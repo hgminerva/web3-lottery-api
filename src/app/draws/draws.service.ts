@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import metadata from './../../../contract/lottery.json';
-
 import { ApiPromise } from '@polkadot/api';
-import { ContractPromise } from '@polkadot/api-contract';
 
+import { PolkadotjsService } from '../polkadotjs/polkadotjs.service';
 import { AddDrawDto } from './dto/add-draw.dto';
 import { OpenDrawDto } from './dto/open-draw.dto';
 import { ProcessDrawDto } from './dto/process-draw.dto';
@@ -13,17 +11,21 @@ import { CloseDrawDto } from './dto/close-draw.dto';
 
 @Injectable()
 export class DrawsService {
-  private readonly contractAddress = process.env.CONTRACT_ADDRESS || '';
-  private readonly contractGasLimits = { storageDepositLimit: null, gasLimit: 3000n * 1000000n };
+
+  constructor(
+    private readonly polkadotJsService: PolkadotjsService
+  ) { }
 
   addDraw(api: ApiPromise, addDrawDto: AddDrawDto): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['addDraw'](
-      this.contractGasLimits,
+      {
+        gasLimit,
+        storageDepositLimit: null
+      },
       addDrawDto.opening_blocks,
       addDrawDto.processing_blocks,
       addDrawDto.closing_blocks,
@@ -34,24 +36,28 @@ export class DrawsService {
   }
 
   removeDraw(api: ApiPromise): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['removeDraw'](this.contractGasLimits);
+    const contractTx = contract.tx['removeDraw']({
+      gasLimit,
+      storageDepositLimit: null
+    });
 
     return contractTx.toHex();
   }
 
   openDraw(api: ApiPromise, openDrawDto: OpenDrawDto): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['openDraw'](
-      this.contractGasLimits,
+      {
+        gasLimit,
+        storageDepositLimit: null
+      },
       openDrawDto.draw_number,
     );
 
@@ -59,13 +65,15 @@ export class DrawsService {
   }
 
   processDraw(api: ApiPromise, processDrawDto: ProcessDrawDto): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['processDraw'](
-      this.contractGasLimits,
+      {
+        gasLimit,
+        storageDepositLimit: null
+      },
       processDrawDto.draw_number,
     );
 
@@ -73,13 +81,15 @@ export class DrawsService {
   }
 
   overrideDraw(api: ApiPromise, overrideDrawDto: OverrideDrawDto): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['overrideDraw'](
-      this.contractGasLimits,
+      {
+        gasLimit,
+        storageDepositLimit: null
+      },
       overrideDrawDto.draw_number,
       overrideDrawDto.winning_number,
     );
@@ -88,27 +98,34 @@ export class DrawsService {
   }
 
   closeDraw(api: ApiPromise, closeDrawDto: CloseDrawDto): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['closeDraw'](
-      this.contractGasLimits,
+      {
+        gasLimit,
+        storageDepositLimit: null
+      },
       closeDrawDto.draw_number,
     );
 
     return contractTx.toHex();
   }
 
-  getDraws(api: ApiPromise): string {
-    if (!api.isConnected) {
-      throw new Error('API is not connected');
-    }
+  async getDraws(api: ApiPromise): Promise<string> {
+    this.polkadotJsService.validateConnection(api);
+    const contract = this.polkadotJsService.createContract(api);
+    const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contract = new ContractPromise(api, metadata, this.contractAddress);
-    const contractTx = contract.tx['getDraws'](this.contractGasLimits);
+    const contractQuery = await contract.query['getDraws'](
+      this.polkadotJsService.contractAddress,
+      {
+        gasLimit,
+        storageDepositLimit: null
+      }
+    );
 
-    return contractTx.toHex();
+    return JSON.stringify(contractQuery.output?.toHuman());
   }
 }
