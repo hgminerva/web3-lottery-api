@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpException, HttpStatus, Delete, Get } from '@nestjs/common';
+import { Controller, Post, Get, Body, Delete, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { DrawsService } from './draws.service';
@@ -13,7 +13,7 @@ import { CloseDrawDto } from './dto/close-draw.dto';
 @ApiTags('Draws')
 @Controller('draws')
 export class DrawsController {
-  
+
   constructor(
     private readonly drawsService: DrawsService,
     private readonly polkadotJsService: PolkadotjsService

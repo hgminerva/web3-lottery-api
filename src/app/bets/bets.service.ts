@@ -6,7 +6,6 @@ import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 
 import { AddBetDto } from './dto/add-bet.dto';
-import { GetBetsDto } from './dto/get-bets.dto';
 
 @Injectable()
 export class BetsService {
@@ -31,7 +30,7 @@ export class BetsService {
     return contractTx.toHex();
   }
 
-  getBets(api: ApiPromise, getBetsDto: GetBetsDto): string {
+  getBets(api: ApiPromise, draw_number: number): string {
     if (!api.isConnected) {
       throw new Error('API is not connected');
     }
@@ -39,7 +38,7 @@ export class BetsService {
     const contract = new ContractPromise(api, metadata, this.contractAddress);
     const contractTx = contract.tx['getBets'](
       this.contractGasOptions,
-      getBetsDto.draw_number,
+      draw_number,
     );
 
     return contractTx.toHex();

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { LotteryService } from './lottery.service';
@@ -9,7 +9,7 @@ import { SetupDto } from './dto/setup.dto';
 @ApiTags('Lottery')
 @Controller('lottery')
 export class LotteryController {
-  
+
   constructor(
     private readonly lotteryService: LotteryService,
     private readonly polkadotJsService: PolkadotjsService
@@ -59,6 +59,23 @@ export class LotteryController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Failed to stop lottery',
+          error: error,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get("get-lottery-setup")
+  async getLotterySetup() {
+    try {
+      const api = await this.polkadotJsService.connect();
+      return this.lotteryService.getLotterySetup(api);
+    } catch (error) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Failed to get lottery setup',
           error: error,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -1,11 +1,10 @@
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { BetsService } from './bets.service';
 import { PolkadotjsService } from './../polkadotjs/polkadotjs.service';
 
 import { AddBetDto } from './dto/add-bet.dto';
-import { GetBetsDto } from './dto/get-bets.dto';
 
 @ApiTags('Bets')
 @Controller('bets')
@@ -33,11 +32,11 @@ export class BetsController {
     }
   }
 
-  @Post("get-bets")
-  async getBets(@Body() getBetsDto: GetBetsDto) {
+  @Get("get-bets/:draw_number")
+  async getBets(@Param('draw_number') draw_number: number) {
     try {
       const api = await this.polkadotJsService.connect();
-      return this.betsService.getBets(api, getBetsDto);
+      return this.betsService.getBets(api, draw_number);
     } catch (error) {
       throw new HttpException(
         {
