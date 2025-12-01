@@ -17,7 +17,7 @@ import { PolkadotjsModule } from './app/polkadotjs/polkadotjs.module';
     LotteryModule,
     DrawsModule,
     BetsModule,
-    PolkadotjsModule
+    PolkadotjsModule,
   ],
   controllers: [
     AppController

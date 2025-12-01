@@ -7,7 +7,7 @@ import { PolkadotjsService } from './../polkadotjs/polkadotjs.service';
 import { SetupDto } from './dto/setup.dto';
 
 @ApiTags('Lottery')
-@Controller('lottery')
+@Controller('api/lottery')
 export class LotteryController {
 
   constructor(

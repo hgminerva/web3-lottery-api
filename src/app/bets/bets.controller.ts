@@ -1,13 +1,13 @@
-import { Controller, Post, Get, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { BetsService } from './bets.service';
 import { PolkadotjsService } from './../polkadotjs/polkadotjs.service';
 
-import { AddBetDto } from './dto/add-bet.dto';
+import { ExecuteBetDto } from './dto/execute-bet.dto';
 
 @ApiTags('Bets')
-@Controller('bets')
+@Controller('api/bets')
 export class BetsController {
 
   constructor(
@@ -15,16 +15,34 @@ export class BetsController {
     private readonly polkadotJsService: PolkadotjsService
   ) { }
 
-  @Post("add-bet")
-  async addBet(@Body() addBetDto: AddBetDto) {
+  @Post('add')
+  async addBet() {
     try {
       const api = await this.polkadotJsService.connect();
-      return this.betsService.addBet(api, addBetDto);
+      return this.betsService.addBet(api);
     } catch (error) {
+      Logger.log(error);
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Failed to add bet',
+          error: error,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('execute')
+  async executeBet(@Body() executeBetDto: ExecuteBetDto) {
+    try {
+      const api = await this.polkadotJsService.connect();
+      return await this.betsService.executeBet(api, executeBetDto);
+    } catch (error) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Failed to execute bet',
           error: error,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

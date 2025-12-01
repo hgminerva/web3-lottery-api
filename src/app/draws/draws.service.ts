@@ -18,7 +18,7 @@ export class DrawsService {
 
   addDraw(api: ApiPromise, addDrawDto: AddDrawDto): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['addDraw'](
@@ -37,7 +37,7 @@ export class DrawsService {
 
   removeDraw(api: ApiPromise): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['removeDraw']({
@@ -50,7 +50,7 @@ export class DrawsService {
 
   openDraw(api: ApiPromise, openDrawDto: OpenDrawDto): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['openDraw'](
@@ -66,7 +66,7 @@ export class DrawsService {
 
   processDraw(api: ApiPromise, processDrawDto: ProcessDrawDto): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['processDraw'](
@@ -82,7 +82,7 @@ export class DrawsService {
 
   overrideDraw(api: ApiPromise, overrideDrawDto: OverrideDrawDto): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['overrideDraw'](
@@ -99,7 +99,7 @@ export class DrawsService {
 
   closeDraw(api: ApiPromise, closeDrawDto: CloseDrawDto): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['closeDraw'](
@@ -115,7 +115,7 @@ export class DrawsService {
 
   async getDraws(api: ApiPromise): Promise<string> {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractQuery = await contract.query['getDraws'](

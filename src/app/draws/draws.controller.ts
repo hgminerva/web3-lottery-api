@@ -11,7 +11,7 @@ import { OverrideDrawDto } from './dto/override-draw.dto';
 import { CloseDrawDto } from './dto/close-draw.dto';
 
 @ApiTags('Draws')
-@Controller('draws')
+@Controller('api/draws')
 export class DrawsController {
 
   constructor(

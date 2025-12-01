@@ -14,7 +14,7 @@ export class LotteryService {
 
   setup(api: ApiPromise, setupDto: SetupDto): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['setup'](
@@ -35,7 +35,7 @@ export class LotteryService {
 
   start(api: ApiPromise): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['start']({
@@ -48,7 +48,7 @@ export class LotteryService {
 
   stop(api: ApiPromise): string {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['stop']({
@@ -61,7 +61,7 @@ export class LotteryService {
 
   async getLotterySetup(api: ApiPromise): Promise<string> {
     this.polkadotJsService.validateConnection(api);
-    const contract = this.polkadotJsService.createContract(api);
+    const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractQuery = await contract.query['getLotterySetup'](

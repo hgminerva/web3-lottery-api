@@ -1,6 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class AddBetDto {
+export class ExecuteBetDto {
+  @ApiProperty()
+  signed_hex: string;
+
   @ApiProperty()
   draw_number: number;
 
@@ -12,7 +15,4 @@ export class AddBetDto {
 
   @ApiProperty()
   upline: string;
-
-  @ApiProperty()
-  tx_hash: string;
 }
