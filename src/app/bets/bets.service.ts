@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { ApiPromise } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
@@ -59,12 +59,13 @@ export class BetsService {
               txHashHex
             );
             const addBetHex = contractTx.toHex();
+            Logger.log(`Add Bet tx hex: ${addBetHex}`);
 
             (async () => {
               try {
                 const operatorsMnemonicSeeds = process.env.OPERATORS_MNEMONIC_SEEDS || '';
                 const keyring = new Keyring({ type: 'sr25519' });
-                const pair = keyring.addFromMnemonic(operatorsMnemonicSeeds);
+                const pair = keyring.addFromUri(operatorsMnemonicSeeds);
 
                 const txHexToBytes = hexToU8a(addBetHex);
                 const extrinsic = api.createType('Extrinsic', txHexToBytes);
@@ -73,6 +74,7 @@ export class BetsService {
                 const signedTxHex = signedTx.toHex();
 
                 this.polkadotJsService.sendTransaction(api, signedTxHex, (betResult: ExtrinsicStatus) => {
+                  Logger.log(`Add Bet tx status: ${betResult.toString()}`);
                   if (betResult.isInBlock) {
                     resolve(betResult.hash.toHex());
                   }

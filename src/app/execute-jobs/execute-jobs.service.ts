@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
 import { PolkadotjsService } from '../polkadotjs/polkadotjs.service';
+import { Keyring } from '@polkadot/keyring';
 
 @Injectable()
 export class ExecuteJobsService {
@@ -16,7 +17,7 @@ export class ExecuteJobsService {
   CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || '';
   OPERATORS_MNEMONIC_SEEDS = process.env.OPERATORS_MNEMONIC_SEEDS || '';
 
-  @Cron('*/5 * * * * *')
+  @Cron('*/60 * * * * *')
   async handleLotteryJobs() {
     if (this.isRunning) return;
     this.isRunning = true;
@@ -46,6 +47,9 @@ export class ExecuteJobsService {
     const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
+    const keyring = new Keyring({ type: "sr25519" });
+    const operatorsMnemonicSeeds = keyring.addFromUri(this.OPERATORS_MNEMONIC_SEEDS);
+
     await api.rpc.chain.subscribeNewHeads(async (header) => {
       const current_block = header.number.toNumber();
 
@@ -56,8 +60,8 @@ export class ExecuteJobsService {
         const lottery = getLotterySetup.output.toJSON() as any;
         Logger.log(`Lottery ${this.truncateMiddle(this.CONTRACT_ADDRESS)} (${lottery.ok?.isStarted}): [${lottery.ok?.startingBlock}, ${lottery.ok?.nextStartingBlock}] O:${this.truncateMiddle(lottery.ok?.operator)}, D:${this.truncateMiddle(lottery.ok?.dev)}`);
 
-        const starting_block = Number(lottery.ok?.startingBlock.toString().replace(/,/g, ''));
-        const next_starting_block = Number(lottery.ok?.nextStartingBlock.toString().replace(/,/g, ''));
+        const startingBlock = Number(lottery.ok?.startingBlock.toString().replace(/,/g, ''));
+        const nextStartingBlock = Number(lottery.ok?.nextStartingBlock.toString().replace(/,/g, ''));
 
         const getDraws = await contract.query['getDraws'](
           this.CONTRACT_ADDRESS, { gasLimit, storageDepositLimit: null }
@@ -65,15 +69,15 @@ export class ExecuteJobsService {
         if (getDraws.output) {
           const draws = getDraws.output.toJSON() as any;
           draws.ok?.map(d => {
-            const opening_blocks = Number(d.openingBlocks.toString().replace(/,/g, '')) + starting_block;
-            const processing_blocks = Number(d.processingBlocks.toString().replace(/,/g, '')) + starting_block;
-            const closing_blocks = Number(d.closingBlocks.toString().replace(/,/g, '')) + starting_block;
+            const openingBlocks = Number(d.openingBlocks.toString().replace(/,/g, '')) + startingBlock;
+            const processingBlocks = Number(d.processingBlocks.toString().replace(/,/g, '')) + startingBlock;
+            const closingBlocks = Number(d.closingBlocks.toString().replace(/,/g, '')) + startingBlock;
 
-            if (!d.isOpen && d.status == "Close" && current_block >= opening_blocks) {
-              if (current_block < closing_blocks) {
+            if (!d.isOpen && d.status == "Close" && current_block >= openingBlocks) {
+              if (current_block < closingBlocks) {
                 contract.tx['openDraw']({ gasLimit, storageDepositLimit: null },
                   d.drawNumber,
-                ).signAndSend(this.OPERATORS_MNEMONIC_SEEDS, (result) => {
+                ).signAndSend(operatorsMnemonicSeeds, (result) => {
                   Logger.log(`Open Draw #${d.drawNumber} status: ${result.status.toString()}`);
                 }).catch((error) => {
                   Logger.error(`Failed to open draw #${d.drawNumber}: ${error.message}`);
@@ -81,20 +85,20 @@ export class ExecuteJobsService {
               }
             }
 
-            if (d.isOpen && d.status == "Open" && current_block >= processing_blocks) {
+            if (d.isOpen && d.status == "Open" && current_block >= processingBlocks) {
               contract.tx['processDraw']({ gasLimit, storageDepositLimit: null },
                 d.drawNumber,
-              ).signAndSend(this.OPERATORS_MNEMONIC_SEEDS, (result) => {
+              ).signAndSend(operatorsMnemonicSeeds, (result) => {
                 Logger.log(`Process Draw #${d.drawNumber} status: ${result.status.toString()}`);
               }).catch((error) => {
                 Logger.error(`Failed to process draw #${d.drawNumber}: ${error.message}`);
               });
             }
 
-            if (!d.isOpen && d.status == "Processing" && current_block >= closing_blocks) {
+            if (!d.isOpen && d.status == "Processing" && current_block >= closingBlocks) {
               contract.tx['closeDraw']({ gasLimit, storageDepositLimit: null },
                 d.drawNumber,
-              ).signAndSend(this.OPERATORS_MNEMONIC_SEEDS, (result) => {
+              ).signAndSend(operatorsMnemonicSeeds, (result) => {
                 Logger.log(`Close Draw #${d.drawNumber} status: ${result.status.toString()}`);
               }).catch((error) => {
                 Logger.error(`Failed to close draw #${d.drawNumber}: ${error.message}`);
@@ -103,23 +107,23 @@ export class ExecuteJobsService {
 
             const jackpot = Number(d.jackpot.toString().replace(/,/g, '')) / 1000000;
 
-            Logger.log(`[Draw: #${d.drawNumber} (${d.status}, ${d.isOpen}, O:${opening_blocks}, P:${processing_blocks}, C:${closing_blocks}): ` +
+            Logger.log(`[Draw: #${d.drawNumber} (${d.status}, ${d.isOpen}, O:${openingBlocks}, P:${processingBlocks}, C:${closingBlocks}): ` +
               `Pot:${jackpot}USDT Bets:${d.bets.length} Win#:${d.winningNumber} Winners:${d.winners.length}]`);
           });
         }
 
-        if (!lottery.ok?.isStarted && current_block >= starting_block) {
+        if (!lottery.ok?.isStarted && current_block >= startingBlock) {
           contract.tx['start']({ gasLimit, storageDepositLimit: null })
-            .signAndSend(this.OPERATORS_MNEMONIC_SEEDS, (result) => {
+            .signAndSend(operatorsMnemonicSeeds, (result) => {
               Logger.log(`Start Lottery status: ${result.status.toString()}`);
             }).catch((error) => {
               Logger.error(`Failed to start lottery: ${error.message}`);
             });
         }
 
-        if (lottery.ok?.isStarted && current_block >= next_starting_block) {
+        if (lottery.ok?.isStarted && current_block >= nextStartingBlock) {
           contract.tx['stop']({ gasLimit, storageDepositLimit: null })
-            .signAndSend(this.OPERATORS_MNEMONIC_SEEDS, (result) => {
+            .signAndSend(operatorsMnemonicSeeds, (result) => {
               Logger.log(`Stop Lottery status: ${result.status.toString()}`);
             }).catch((error) => {
               Logger.error(`Failed to stop lottery: ${error.message}`);
