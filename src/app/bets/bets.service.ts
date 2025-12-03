@@ -46,9 +46,9 @@ export class BetsService {
     return new Promise((resolve, reject) => {
       (async () => {
         const extrinsic = api.createType('Extrinsic', executeBetDto.signed_hex);
-        await api.tx(extrinsic).send((result: ISubmittableResult) => {
-          if (result.isInBlock) {
-            const txHashHex = result.status.asInBlock.toHex();
+        await api.tx(extrinsic).send((sendAssetResults: ISubmittableResult) => {
+          if (sendAssetResults.isInBlock) {
+            const txHashHex = sendAssetResults.status.asInBlock.toHex();
 
             const keyring = new Keyring({ type: "sr25519" });
             const operatorsMnemonicSeeds = keyring.addFromUri(this.OPERATORS_MNEMONIC_SEEDS);
@@ -62,13 +62,21 @@ export class BetsService {
               executeBetDto.bettor,
               executeBetDto.upline,
               txHashHex
-            ).signAndSend(operatorsMnemonicSeeds, (result: ISubmittableResult) => {
-              if (result.isInBlock) {
-                resolve(result.status.asInBlock.toHex().toString());
+            ).signAndSend(operatorsMnemonicSeeds, (addBetResults: ISubmittableResult) => {
+              if (addBetResults.isInBlock) {
+                resolve(addBetResults.status.asInBlock.toHex().toString());
+              }
+
+              if (addBetResults.isError) {
+                reject(new Error(addBetResults.status.toString()));
               }
             }).catch((error) => {
               reject(new Error(error));
             });
+          }
+
+          if (sendAssetResults.isError) {
+            reject(new Error(sendAssetResults.status.toString()));
           }
         }).catch((error) => {
           reject(new Error(error));
