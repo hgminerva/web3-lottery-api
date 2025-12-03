@@ -5,7 +5,7 @@ import metadata from './../../../contract/lottery.json';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { ExtrinsicStatus, WeightV2 } from '@polkadot/types/interfaces';
+import { WeightV2 } from '@polkadot/types/interfaces';
 
 @Injectable()
 export class PolkadotjsService {
@@ -35,16 +35,5 @@ export class PolkadotjsService {
     if (!api.isConnected) {
       throw new Error('API is not connected');
     }
-  }
-
-  sendTransaction(api: ApiPromise, signedHex: string, callback: (result: ExtrinsicStatus) => void): void {
-    this.validateConnection(api);
-
-    const extrinsic = api.createType('Extrinsic', signedHex);
-    api.rpc.author.submitAndWatchExtrinsic(extrinsic, (result) => {
-      callback(result);
-    }).catch((error) => {
-      throw new Error(`Failed to execute extrinsic: ${error.message}`);
-    });
   }
 }

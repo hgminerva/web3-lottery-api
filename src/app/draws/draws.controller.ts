@@ -23,7 +23,7 @@ export class DrawsController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Failed to get draws',
-          error: error,
+          error: error instanceof Error ? error.message : new Error(String(error)).message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

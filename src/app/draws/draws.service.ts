@@ -22,10 +22,7 @@ export class DrawsService {
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['addDraw'](
-      {
-        gasLimit,
-        storageDepositLimit: null
-      },
+      { gasLimit, storageDepositLimit: null },
       addDrawDto.opening_blocks,
       addDrawDto.processing_blocks,
       addDrawDto.closing_blocks,
@@ -40,10 +37,9 @@ export class DrawsService {
     const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contractTx = contract.tx['removeDraw']({
-      gasLimit,
-      storageDepositLimit: null
-    });
+    const contractTx = contract.tx['removeDraw'](
+      { gasLimit, storageDepositLimit: null }
+    );
 
     return contractTx.toHex();
   }
@@ -54,10 +50,7 @@ export class DrawsService {
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['openDraw'](
-      {
-        gasLimit,
-        storageDepositLimit: null
-      },
+      { gasLimit, storageDepositLimit: null },
       openDrawDto.draw_number,
     );
 
@@ -70,10 +63,7 @@ export class DrawsService {
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['processDraw'](
-      {
-        gasLimit,
-        storageDepositLimit: null
-      },
+      { gasLimit, storageDepositLimit: null },
       processDrawDto.draw_number,
     );
 
@@ -86,10 +76,7 @@ export class DrawsService {
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['overrideDraw'](
-      {
-        gasLimit,
-        storageDepositLimit: null
-      },
+      { gasLimit, storageDepositLimit: null },
       overrideDrawDto.draw_number,
       overrideDrawDto.winning_number,
     );
@@ -103,10 +90,7 @@ export class DrawsService {
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['closeDraw'](
-      {
-        gasLimit,
-        storageDepositLimit: null
-      },
+      { gasLimit, storageDepositLimit: null },
       closeDrawDto.draw_number,
     );
 
@@ -120,10 +104,7 @@ export class DrawsService {
 
     const contractQuery = await contract.query['getDraws'](
       this.polkadotJsService.contractAddress,
-      {
-        gasLimit,
-        storageDepositLimit: null
-      }
+      { gasLimit, storageDepositLimit: null },
     );
 
     return JSON.stringify(contractQuery.output?.toHuman());

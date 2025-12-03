@@ -18,10 +18,7 @@ export class LotteryService {
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
     const contractTx = contract.tx['setup'](
-      {
-        gasLimit,
-        storageDepositLimit: null
-      },
+      { gasLimit, storageDepositLimit: null },
       setupDto.operator,
       setupDto.asset_id,
       setupDto.starting_block,
@@ -38,10 +35,9 @@ export class LotteryService {
     const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contractTx = contract.tx['start']({
-      gasLimit,
-      storageDepositLimit: null
-    });
+    const contractTx = contract.tx['start'](
+      { gasLimit, storageDepositLimit: null },
+    );
 
     return contractTx.toHex();
   }
@@ -51,10 +47,9 @@ export class LotteryService {
     const contract = this.polkadotJsService.initContract(api);
     const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-    const contractTx = contract.tx['stop']({
-      gasLimit,
-      storageDepositLimit: null
-    });
+    const contractTx = contract.tx['stop'](
+      { gasLimit, storageDepositLimit: null },
+    );
 
     return contractTx.toHex();
   }
@@ -66,10 +61,7 @@ export class LotteryService {
 
     const contractQuery = await contract.query['getLotterySetup'](
       this.polkadotJsService.contractAddress,
-      {
-        gasLimit,
-        storageDepositLimit: null
-      }
+      { gasLimit, storageDepositLimit: null },
     );
 
     return JSON.stringify(contractQuery.output?.toHuman());

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { BetsService } from './bets.service';
@@ -21,12 +21,11 @@ export class BetsController {
       const api = await this.polkadotJsService.connect();
       return this.betsService.addBet(api);
     } catch (error) {
-      Logger.log(error);
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Failed to add bet',
-          error: error,
+          error: error instanceof Error ? error.message : new Error(String(error)).message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -43,7 +42,7 @@ export class BetsController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Failed to execute bet',
-          error: error,
+          error: error instanceof Error ? error.message : new Error(String(error)).message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -60,7 +59,7 @@ export class BetsController {
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Failed to get bets',
-          error: error,
+          error: error instanceof Error ? error.message : new Error(String(error)).message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
