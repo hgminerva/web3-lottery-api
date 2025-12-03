@@ -46,7 +46,7 @@ export class BetsService {
     return new Promise((resolve, reject) => {
       (async () => {
         const extrinsic = api.createType('Extrinsic', executeBetDto.signed_hex);
-        await api.tx(extrinsic).send((sendAssetResults: ISubmittableResult) => {
+        await api.tx(extrinsic).send(async (sendAssetResults: ISubmittableResult) => {
           if (sendAssetResults.isInBlock) {
             const txHashHex = sendAssetResults.status.asInBlock.toHex();
 
@@ -56,7 +56,7 @@ export class BetsService {
             const contract = this.polkadotJsService.initContract(api);
             const gasLimit = this.polkadotJsService.createGasLimit(api);
 
-            contract.tx['addBet']({ gasLimit, storageDepositLimit: null },
+            await contract.tx['addBet']({ gasLimit, storageDepositLimit: null },
               executeBetDto.draw_number,
               executeBetDto.bet_number,
               executeBetDto.bettor,
