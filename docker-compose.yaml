@@ -1,11 +1,11 @@
 services:
   app:
-    image: hgminerva/web3-lottery-api:latest
+    image: oliverrigonan/web3-lottery-api:latest
     container_name: web3-lottery-api
     env_file:
      - .env
     ports:
-     - 3000:3000
+     - 3007:3000
     volumes:
      - /var/www/html/web3-lottery-api/.env:/usr/src/app/.env
   
